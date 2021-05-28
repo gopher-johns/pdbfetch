@@ -5,18 +5,16 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"sort"
-
-	"github.com/edsrzf/mmap-go"
 )
 
 // TODO: detect endianess instead of forcing LittleEndian
 
 // The representation of the PEFile with some helpful abstractions
 type PEFile struct {
-	Filename          string
 	DosHeader         *DosHeader
 	NTHeader          *NTHeader
 	FileHeader        *FileHeader
@@ -32,27 +30,18 @@ type PEFile struct {
 
 	// Private Fields
 	reader    *bytes.Reader
-	data      mmap.MMap
+	data      []byte
 	dataLen   int
 	headerEnd int
 }
 
-func PE(filename string) (pe *PEFile, err error) {
+func PE(rPe io.Reader) (pe *PEFile, err error) {
 	pe = new(PEFile)
-	pe.Filename = filename
 
 	// Current file offset.
 	offset := 0
 
-	handle, err := os.Open(pe.Filename)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = handle.Close()
-	}()
-
-	pe.data, err = mmap.Map(handle, mmap.RDONLY, 0)
+	pe.data, err = ioutil.ReadAll(rPe)
 	if err != nil {
 		return nil, err
 	}
@@ -245,21 +234,12 @@ func PE(filename string) (pe *PEFile, err error) {
 	return pe, nil
 }
 
-func OBJ(filename string) (pe *PEFile, err error) {
+func OBJ(rObj io.Reader) (pe *PEFile, err error) {
 	pe = new(PEFile)
-	pe.Filename = filename
 
 	offset := 0
 
-	handle, err := os.Open(pe.Filename)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = handle.Close()
-	}()
-
-	pe.data, err = mmap.Map(handle, mmap.RDONLY, 0)
+	pe.data, err = ioutil.ReadAll(rObj)
 	if err != nil {
 		return nil, err
 	}
