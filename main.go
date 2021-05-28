@@ -36,7 +36,7 @@ import (
 	"strings"
 	"time"
 
-	"pdbfetch/pkg/pe"
+	"github.com/gopher-johns/pdbfetch/pkg/pe"
 )
 
 func probeWithUnderscore(path string) string {
@@ -252,7 +252,12 @@ func main() {
 	}
 
 	// Parse the PE file of the target.
-	pefile, err := pe.PE(pePath)
+	p, err := os.Open(pePath)
+	if err != nil {
+		log.Fatalf("could not open %s, error: %s", pePath, err)
+	}
+	defer p.Close()
+	pefile, err := pe.PE(p)
 	if err != nil {
 		log.Fatal(err)
 	}

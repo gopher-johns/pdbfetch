@@ -1,4 +1,4 @@
-module pdbfetch
+module github.com/gopher-johns/pdbfetch
 
 go 1.13
 
