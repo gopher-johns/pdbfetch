@@ -117,7 +117,8 @@ func (p *PEFile) parseImports(importDesc *ImportDescriptor) (err error) {
 				imp.ImportByOrdinal = false
 				imp.HintNameTableRva = table[idx].AddressOfData & addressMask
 
-				if err := p.parseInterface(&imp.Hint, int(imp.HintNameTableRva), 2); err != nil {
+				offset := p.getOffsetFromRva(imp.HintNameTableRva)
+				if err := p.parseInterface(&imp.Hint, offset, 2); err != nil {
 					return err
 				}
 
